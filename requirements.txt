@@ -1,0 +1,6 @@
+kafka-python
+feast
+tensorflow
+bentoml
+pandas
+numpy
