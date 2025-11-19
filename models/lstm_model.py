@@ -1,25 +1,30 @@
-import pandas as pd
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
-from feast import FeatureStore
 
-store = FeatureStore(repo_path="../feature_store")
-entity_df = pd.DataFrame({"user_id": [1, 2, 3]})
+# Generate enough synthetic data
+n_samples = 100
+n_timesteps = 1
+n_features = 2
 
-features = store.get_online_features(
-    features=["user_engagement:feature1", "user_engagement:feature2"],
-    entity_rows=entity_df.to_dict(orient="records")
-).to_df()
+# Randomly generate float features between 0 and 1
+X = np.random.rand(n_samples, n_timesteps, n_features)
 
-X = features[["feature1", "feature2"]].values
-y = np.array([0, 1, 0])  # Dummy labels
-X = X.reshape((X.shape[0], 1, X.shape[1]))
+# Random binary labels (0=normal, 1=anomaly)
+y = np.random.randint(0, 2, size=n_samples).astype(np.float32)
 
+print("Shapes:", X.shape, y.shape)
+print("Any NaN in X?", np.isnan(X).any())
+print("Any NaN in y?", np.isnan(y).any())
+print("Any Inf in X?", np.isinf(X).any())
+
+# Build, compile, and train simple LSTM model
 model = Sequential()
-model.add(LSTM(10, activation='relu', input_shape=(X.shape[1], X.shape[2])))
+model.add(LSTM(10, activation='relu', input_shape=(n_timesteps, n_features)))
 model.add(Dense(1, activation='sigmoid'))
 model.compile(optimizer='adam', loss='binary_crossentropy')
-model.fit(X, y, epochs=10, verbose=2)
+history = model.fit(X, y, epochs=10, verbose=2)
+
+print("Loss values per epoch:", history.history['loss'])
 model.save("lstm_user_engagement.h5")
 print("LSTM Model trained and saved!")
