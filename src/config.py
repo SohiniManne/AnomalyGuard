@@ -1,5 +1,5 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
 class Settings(BaseSettings):
@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "AnomalyGuard"
     DEBUG_MODE: bool = True
     
-    # Kafka Configuration (Confluent Cloud)
+    # Kafka Configuration
     KAFKA_BOOTSTRAP_SERVERS: str
     KAFKA_API_KEY: str
     KAFKA_API_SECRET: str
@@ -18,9 +18,8 @@ class Settings(BaseSettings):
     FEATURE_REPO_PATH: str = os.path.join(BASE_DIR, "feature_repo")
     MODEL_PATH: str = os.path.join(BASE_DIR, "services", "model.pkl")
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    # New Pydantic V2 Config
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 @lru_cache()
 def get_settings():
